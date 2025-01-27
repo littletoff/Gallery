@@ -1,0 +1,7 @@
+# Ignore virtual environments
+venv/
+.idea/
+__pycache__/
+*.pyc
+*.log
+*.db

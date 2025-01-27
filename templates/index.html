@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Room with Artwork</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+    // Scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Room dimensions
+    const roomWidth = 10;
+    const roomHeight = 5;
+    const roomDepth = 10;
+
+    // Lighting
+    const light = new THREE.AmbientLight(0xffffff, 0.8); // Soft white light
+    scene.add(light);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(5, 10, 5);
+    scene.add(directionalLight);
+
+    // Floor
+    const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+    const floorGeometry = new THREE.PlaneGeometry(roomWidth, roomDepth);
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2; // Lay flat
+    scene.add(floor);
+
+    // Walls
+    const wallMaterial = new THREE.MeshBasicMaterial({ color: 0xeeeeee, side: THREE.DoubleSide });
+    const wallGeometry = new THREE.PlaneGeometry(roomWidth, roomHeight);
+
+    // Back Wall
+    const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    backWall.position.set(0, roomHeight / 2, -roomDepth / 2); // Position on Z-axis
+    scene.add(backWall);
+
+    // Left Wall
+    const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    leftWall.rotation.y = Math.PI / 2; // Rotate to face the X-axis
+    leftWall.position.set(-roomWidth / 2, roomHeight / 2, 0);
+    scene.add(leftWall);
+
+    // Right Wall
+    const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    rightWall.rotation.y = -Math.PI / 2; // Rotate to face the X-axis
+    rightWall.position.set(roomWidth / 2, roomHeight / 2, 0);
+    scene.add(rightWall);
+
+    // Load Textures (Your Artwork)
+    const textureLoader = new THREE.TextureLoader();
+    const artworks = [
+      { url: './static/images/art1.jpg', position: [0, 2.5, -roomDepth / 2 + 0.1], rotation: [0, 0, 0] }, // Back wall
+      { url: './static/images/art2.jpg', position: [-roomWidth / 2 + 0.1, 2.5, 0], rotation: [0, Math.PI / 2, 0] }, // Left wall
+      { url: './static/images/art3.jpg', position: [roomWidth / 2 - 0.1, 2.5, 0], rotation: [0, -Math.PI / 2, 0] }  // Right wall
+    ];
+
+    artworks.forEach((artwork) => {
+      const texture = textureLoader.load(artwork.url);
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const geometry = new THREE.PlaneGeometry(3, 3); // Image size (adjust as needed)
+      const mesh = new THREE.Mesh(geometry, material);
+
+      // Position and rotate the image
+      mesh.position.set(...artwork.position);
+      mesh.rotation.set(...artwork.rotation);
+      scene.add(mesh);
+    });
+
+    // Camera setup
+    camera.position.set(0, 2.5, 5); // Position the camera inside the room
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Handle window resizing
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
