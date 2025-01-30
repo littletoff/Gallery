@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Room with Artwork</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    // Scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50); // Adjusted clipping planes
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    // Room dimensions
+    const roomWidth = 10;
+    const roomHeight = 5;
+    const roomDepth = 10;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 10, 5);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+
+    // Texture loader
+    const textureLoader = new THREE.TextureLoader();
+
+    // Floor with texture
+    const floorTexture = textureLoader.load('./static/images/floor.jpg');
+    floorTexture.wrapS = THREE.RepeatWrapping;
+    floorTexture.wrapT = THREE.RepeatWrapping;
+    floorTexture.repeat.set(roomWidth / 2, roomDepth / 2);
+
+    const floorMaterial = new THREE.MeshStandardMaterial({ map: floorTexture });
+    const floorGeometry = new THREE.PlaneGeometry(roomWidth, roomDepth);
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // Walls with neutral color
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      color: 0xbbbbbb, // Neutral gray
+      side: THREE.DoubleSide,
+    });
+    const wallGeometry = new THREE.PlaneGeometry(roomWidth, roomHeight);
+
+    // Back Wall
+    const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    backWall.position.set(0, roomHeight / 2, -roomDepth / 2); // Align exactly with the back edge
+    backWall.receiveShadow = true;
+    scene.add(backWall);
+
+    // Left Wall
+    const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    leftWall.rotation.y = Math.PI / 2;
+    leftWall.position.set(-roomWidth / 2, roomHeight / 2, 0); // Align exactly with the left edge
+    leftWall.receiveShadow = true;
+    scene.add(leftWall);
+
+    // Right Wall
+    const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    rightWall.rotation.y = -Math.PI / 2;
+    rightWall.position.set(roomWidth / 2, roomHeight / 2, 0); // Align exactly with the right edge
+    rightWall.receiveShadow = true;
+    scene.add(rightWall);
+
+    // Camera setup
+    camera.position.set(0, 2.5, 12);
+
+    // Controls for interactivity
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.1;
+    controls.minDistance = 5;
+    controls.maxDistance = 20;
+    controls.maxPolarAngle = Math.PI / 2;
+
+    // Hardcoded Artwork Paths
+    const artworks = [
+      { url: './static/images/art1.jpg', position: [0, 2.5, -roomDepth / 2 + 0.1], rotation: [0, 0, 0] }, // Back wall
+      { url: './static/images/art2.jpg', position: [-roomWidth / 2 + 0.1, 2.5, 0], rotation: [0, Math.PI / 2, 0] }, // Left wall
+      { url: './static/images/art3.jpg', position: [roomWidth / 2 - 0.1, 2.5, 0], rotation: [0, -Math.PI / 2, 0] } // Right wall
+    ];
+
+    // Load and render each artwork
+    artworks.forEach((artwork, index) => {
+      textureLoader.load(artwork.url, (texture) => {
+        console.log(`Artwork ${index}: Loaded texture from ${artwork.url}`);
+
+        // Create a unique material for each artwork
+        const material = new THREE.MeshStandardMaterial({
+          map: texture,
+          depthTest: true,
+          polygonOffset: true,
+          polygonOffsetFactor: -1,
+          polygonOffsetUnits: -1,
+        });
+
+        // Create geometry and mesh
+        const aspect = texture.image.width / texture.image.height;
+        const geometry = new THREE.PlaneGeometry(3 * aspect, 3);
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true;
+        mesh.renderOrder = 10; // Render artworks after walls
+
+        // Position and rotate the artwork
+        mesh.position.set(...artwork.position);
+        mesh.rotation.set(...artwork.rotation);
+
+        // Add the mesh to the scene
+        scene.add(mesh);
+      });
+    });
+
+    // Animation loop
+    function animate() {
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Handle window resizing
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
+
