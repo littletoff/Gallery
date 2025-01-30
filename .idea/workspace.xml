@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3f9f07d6-9725-41b8-bc40-6009eb1ccb0d" name="Changes" comment="initial commit for Gallery project">
+    <list default="true" id="3f9f07d6-9725-41b8-bc40-6009eb1ccb0d" name="Changes" comment="Gallery project">
+      <change afterPath="$PROJECT_DIR$/static/js/helpers.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/floor/tinified.zip" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -67,6 +68,8 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\OliverBishop\PycharmProjects\Gallery\static" />
+      <recent name="C:\Users\OliverBishop\PycharmProjects\Gallery" />
       <recent name="C:\Users\OliverBishop\PycharmProjects\Gallery\templates" />
     </key>
   </component>
@@ -139,11 +142,28 @@
       <option name="project" value="LOCAL" />
       <updated>1738010049444</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Gallery project">
+      <option name="closed" value="true" />
+      <created>1738267199987</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1738267199987</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Gallery project">
+      <option name="closed" value="true" />
+      <created>1738267241757</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1738267241757</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial commit for Gallery project" />
-    <option name="LAST_COMMIT_MESSAGE" value="initial commit for Gallery project" />
+    <MESSAGE value="Gallery project" />
+    <option name="LAST_COMMIT_MESSAGE" value="Gallery project" />
   </component>
 </project>

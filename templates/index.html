@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Room with Artwork</title>
+  <title>3D Art Gallery</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
 
-    /* Modal Styles */
+    /* Modal for Artwork */
     .modal {
       display: none;
       position: fixed;
@@ -46,153 +46,13 @@
     <img id="modalImage" src="" alt="Artwork">
   </div>
 
+  <!-- Load Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js"></script>
 
-  <script>
-    // Scene setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+  <script src="{{ url_for('static', filename='js/helpers.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-    // Room dimensions
-    const roomWidth = 3;
-    const roomHeight = 2.5;
-    const roomDepth = 3;
-
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(5, 10, 5);
-    scene.add(directionalLight);
-
-    // Texture loader
-    const textureLoader = new THREE.TextureLoader();
-
-    // Floor with texture
-    const floorTexture = textureLoader.load('./static/images/floor.jpg');
-    floorTexture.wrapS = THREE.RepeatWrapping;
-    floorTexture.wrapT = THREE.RepeatWrapping;
-    floorTexture.repeat.set(roomWidth * 2, roomDepth * 2);
-
-    const floorMaterial = new THREE.MeshStandardMaterial({ map: floorTexture });
-    const floorGeometry = new THREE.PlaneGeometry(roomWidth, roomDepth);
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = true;
-    scene.add(floor);
-
-    // Walls
-    const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xbbbbbb, side: THREE.DoubleSide });
-    const wallGeometry = new THREE.PlaneGeometry(roomWidth, roomHeight);
-    const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    backWall.position.set(0, roomHeight / 2, -roomDepth / 2);
-    scene.add(backWall);
-    const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    leftWall.rotation.y = Math.PI / 2;
-    leftWall.position.set(-roomWidth / 2, roomHeight / 2, 0);
-    scene.add(leftWall);
-    const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    rightWall.rotation.y = -Math.PI / 2;
-    rightWall.position.set(roomWidth / 2, roomHeight / 2, 0);
-    scene.add(rightWall);
-
-    // Camera setup
-    camera.position.set(0, 1.7, 2);
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.target.set(0, 1.5, 0);
-    controls.minDistance = 1.5;
-    controls.maxDistance = 4;
-
-    // Artwork metadata
-    const artworks = [
-      { url: './static/images/art1.jpg', width_cm: 50, height_cm: 70 },
-      { url: './static/images/art2.jpg', width_cm: 60, height_cm: 80 },
-      { url: './static/images/art3.jpg', width_cm: 60, height_cm: 80 },
-    ];
-
-    const artworkMeshes = [];
-    artworks.forEach((artwork, index) => {
-      textureLoader.load(artwork.url, (texture) => {
-        const width = artwork.width_cm / 100;
-        const height = artwork.height_cm / 100;
-        const geometry = new THREE.PlaneGeometry(width, height);
-        const material = new THREE.MeshStandardMaterial({ map: texture });
-
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.userData = { url: artwork.url }; // Store URL for pop-up
-
-        if (index === 0) {
-          mesh.position.set(0, 1.5, -roomDepth / 2 + 0.1);
-        } else if (index === 1) {
-          mesh.position.set(-roomWidth / 2 + 0.1, 1.5, 0);
-          mesh.rotation.y = Math.PI / 2;
-        } else {
-          mesh.position.set(roomWidth / 2 - 0.1, 1.5, 0);
-          mesh.rotation.y = -Math.PI / 2;
-        }
-
-        scene.add(mesh);
-        artworkMeshes.push(mesh);
-      });
-    });
-
-    // Load logo texture
-    const logoTexture = textureLoader.load('./static/images/logo.png');
-    const logoGeometry = new THREE.PlaneGeometry(0.5, 0.25);
-    const logoMaterial = new THREE.MeshStandardMaterial({
-      map: logoTexture,
-      transparent: true,
-    });
-    const logo = new THREE.Mesh(logoGeometry, logoMaterial);
-    logo.position.set(0, 2, -roomDepth / 2 + 0.1);
-    scene.add(logo);
-
-    // Raycaster for detecting clicks
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    function onDocumentMouseDown(event) {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(artworkMeshes);
-
-      if (intersects.length > 0) {
-        const selectedArtwork = intersects[0].object;
-        showModal(selectedArtwork.userData.url);
-      }
-    }
-
-    function showModal(imageUrl) {
-      document.getElementById("modalImage").src = imageUrl;
-      document.getElementById("artworkModal").style.display = "flex";
-    }
-
-    function closeModal() {
-      document.getElementById("artworkModal").style.display = "none";
-    }
-
-    window.addEventListener("mousedown", onDocumentMouseDown);
-    window.addEventListener("keydown", function(event) {
-      if (event.key === "Escape") closeModal();
-    });
-
-    function animate() {
-      controls.update();
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
-    animate();
-  </script>
 </body>
 </html>
-
-
-
-
